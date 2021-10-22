@@ -12,6 +12,7 @@ const FILES_TO_CACHE = [
   '/icons/icon-512x512.png',
 ];
 
+
 self.addEventListener(`install`, event => {
   console.log(`SERVICE-WORKER INSTALL EVENT FIRED`);
   // pre cache all static assets
@@ -22,15 +23,30 @@ self.addEventListener(`install`, event => {
   );
   // activate immediately once finished installing
   self.skipWaiting();
-})
+});
 
 self.addEventListener(`activate`, event => {
-  console.log(`SERVICE-WORKER ACTIVATE EVENT FIRED`)
-})
+  console.log(`SERVICE-WORKER ACTIVATE EVENT FIRED`);
+  event.waitUntil(
+    caches.keys()
+      .then(keyList => {
+        return Promise.all(
+          keyList.map(key => {
+            if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+              console.log("Removing old cache data", key);
+              return caches.delete(key);
+            }
+          })
+        );
+      }).catch(err => console.log(err))
+  );
+
+  self.clients.claim();
+});
 
 self.addEventListener(`fetch`, event => {
-  console.log(`SERVICE-WORKER FETCH EVENT FIRED`)
+  console.log(`SERVICE-WORKER FETCH EVENT FIRED`);
   console.log(event)
   console.log(event.request)
-})
+});
 
