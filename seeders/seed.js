@@ -9,27 +9,27 @@ const transactionSeed = [
   {
     name: "New Shoes",
     value: 100,
-    date: new Date(Date.now())
+    date: new Date(new Date().setDate(new Date().getDate() - 9))
   },
   {
     name: "New Clothes",
     value: 200,
-    date: new Date(Date.now())
+    date: new Date(new Date().setDate(new Date().getDate() - 7))
   },
   {
     name: "Utilities",
     value: 300,
-    date: new Date(Date.now())
+    date: new Date(new Date().setDate(new Date().getDate() - 5))
   },
   {
     name: "Dentist Copay",
     value: 50,
-    date: new Date(Date.now())
+    date: new Date(new Date().setDate(new Date().getDate() - 5))
   },
   {
     name: "Thai Food",
     value: 50,
-    date: new Date(Date.now())
+    date: new Date(new Date().setDate(new Date().getDate() - 3))
   },
 ];
 
