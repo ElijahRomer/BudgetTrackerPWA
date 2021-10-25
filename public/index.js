@@ -12,7 +12,10 @@ fetch("/api/transaction")
     populateTotal();
     populateTable();
     populateChart();
-  });
+  })
+  .catch(err => {
+    console.log(err);
+  })
 
 function populateTotal() {
   // reduce transaction amounts to a single total value
@@ -144,19 +147,37 @@ function sendTransaction(isAdding) {
     });
 };
 
+
 function saveRecord(transaction) {
   // TODO: Write saveRecord Function to save offline transaction to indexedDB
-  console.log(`NO CONNECTION`);
+  console.log(`NO CONNECTION, saveRecord FIRED`);
   console.log(transaction);
   const request = indexedDB.open("budgetAppOfflineDB", 1);
 
   request.onupgradeneeded = ({ target }) => {
+    console.log(`IndexedDB ONUPGRADENEEDED registered`);
     const db = target.result;
-    const objectStore = db.createObjectStore(`transactions`);
+    const objectStore = db.createObjectStore(`transactions`, { keyPath: "name" });
+    objectStore.createIndex("unsavedTx", "name")
   }
 
   request.onsuccess = event => {
-    console.log(request.result);
+    console.log(`IndexedDB ONSUCCESS registered`);
+    const db = request.result;
+    const dbTransaction = db.transaction([`transactions`], 'readwrite');
+    const transactionsStore = dbTransaction.objectStore(`transactions`);
+    console.log(transactionsStore);
+    transactionsStore.add(transaction);
+
+    dbTransaction.oncomplete = (e) => {
+      console.log(`RECORD ADDED TO INDEXEDDB`);
+      console.log(e);
+    };
+
+    dbTransaction.onerror = (err) => {
+      console.log(err);
+    }
+
   }
 
 }

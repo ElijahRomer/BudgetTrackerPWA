@@ -65,7 +65,7 @@ self.addEventListener(`fetch`, event => {
           // then make the fetch request to the server
           return fetch(event.request)
             .then(response => {
-              console.log(response);
+              console.log(response.clone());
 
               // if the response from server is status 200 add to the cache with key as the request url and the value as the response.
               if (response.status === 200) {
@@ -74,6 +74,7 @@ self.addEventListener(`fetch`, event => {
               // if the response succeeds OR if response from the server is something other than status 200
               return response;
             })
+            // if there is no connection or the server does not response, check the cache for the requested file
             .catch(err => cache.match(event.request));
         }));
     return;
