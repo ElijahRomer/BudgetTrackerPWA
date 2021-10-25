@@ -5,6 +5,7 @@ const DATA_CACHE_NAME = "BT-data-cache-v1";
 
 const FILES_TO_CACHE = [
   '/', //must include this as when you are offline the landing page is linked to the bare '/' request.
+  'manifest.webmanifest',
   '/index.html',
   '/index.js',
   '/service-worker.js',
@@ -70,7 +71,7 @@ self.addEventListener(`fetch`, event => {
               if (response.status === 200) {
                 cache.put(event.request.url, response.clone())
               }
-              // if the response from the server is something other than status 200
+              // if the response succeeds OR if response from the server is something other than status 200
               return response;
             })
             .catch(err => cache.match(event.request));
