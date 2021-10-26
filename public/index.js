@@ -14,10 +14,40 @@ fetch("/api/transaction")
     populateTotal();
     populateTable();
     populateChart();
+
+    // TODO: WRITE A FUNCTION TO VERIFY ALL FETCHED ENTRIES ARE IN THE INDEXED DB. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   })
   .catch(err => {
     // TODO: FETCH REQUEST FAILED, PULL RESULTS FROM INDEXEDDB
     console.log(err);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -87,7 +117,7 @@ function populateChart() {
   });
 }
 
-function sendTransaction(isAdding) {
+async function sendTransaction(isAdding) {
   let nameEl = document.querySelector("#t-name");
   let amountEl = document.querySelector("#t-amount");
   let errorEl = document.querySelector(".form .error");
@@ -121,6 +151,9 @@ function sendTransaction(isAdding) {
   populateTable();
   populateTotal();
 
+  // save record to indexedDB
+  saveRecord(transaction);
+
   // also send to server
   fetch("/api/transaction", {
     method: "POST",
@@ -144,12 +177,12 @@ function sendTransaction(isAdding) {
       }
     })
     .catch(err => {
-      // fetch failed, so save in indexed db
-      saveRecord(transaction);
-
       // clear form
       nameEl.value = "";
       amountEl.value = "";
+
+      // fetch failed, so save so it can be synced to server later 
+      saveRecordForLaterSyncing(transaction);
     });
 };
 

@@ -34,6 +34,7 @@ self.addEventListener(`install`, event => {
 
 self.addEventListener(`activate`, event => {
   console.log(`SERVICE-WORKER ACTIVATE EVENT REGISTERED`);
+  console.log(`checking for outdated cache files...`)
   event.waitUntil(
     // grab full list of cache keys
     caches.keys()
@@ -45,6 +46,7 @@ self.addEventListener(`activate`, event => {
               console.log("Removing old cache data", key);
               return caches.delete(key);
             }
+            console.log(`No Outdated cache data found.`)
           })
         );
       }).catch(err => console.log(err))
@@ -62,50 +64,52 @@ self.addEventListener(`fetch`, event => {
   // if the fetch is for posting a new transaction
   if (event.request.method === 'POST') {
     console.log(`POST FETCH FOR NEW DATA`, event.request.url);
-    console.log(event.request)
+    console.log(event.request.clone())
 
     event.respondWith(
+      fetch(event.request.clone()))
+    // caches.open(DATA_CACHE_NAME)
+    //   .then(cache => {
+    //     // attempt to make the fetch request to the server
+    //     return fetch(event.request)
+    //       .then(response => {
+    //         console.log(response.clone());
 
-      caches.open(DATA_CACHE_NAME)
-        .then(cache => {
-          // attempt to make the fetch request to the server
-          return fetch(event.request)
-            .then(response => {
-              console.log(response.clone());
+    //         // if the response from server is status 200 add to the cache with key as the request url and the value as the response.
+    //         if (response.status === 200) {
+    //           cache.put(event.request.url, response.clone())
+    //         }
 
-              // if the response from server is status 200 add to the cache with key as the request url and the value as the response.
-              if (response.status === 200) {
-                cache.put(event.request.url, response.clone())
-              }
+    //         // if the response succeeds OR if response from the server is something other than status 200
+    //         return response;
+    //       })
 
-              // if the response succeeds OR if response from the server is something other than status 200
-              return response;
-            })
-
-            // if there is no connection or the server does not responsd, check the cache for the requested file
-            .catch(err => cache.match(event.request));
-        }));
-    return;
+    //       // if there is no connection or the server does not responsd, check the cache for the requested file
+    //       .catch(err => cache.match(event.request));
+    //   }));
+    // return;
   };
 
   if (event.request.url.includes("/api/" && event.request.method === "GET")) {
     // TODO: write logic for querying data from indexedDB instead.
-
+    return fetch(event.request);
   }
 
 
   // if the fetch is for static files on page load
-  event.respondWith(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log(`FETCH FOR STATIC FILE`);
-      console.log(event.request)
-      return cache.match(event.request)
-        .then(response => {
-          if (!response) {
-            console.log(`NOTHING IN CACHE FOR ABOVE REQUEST ${event.request.url}`)
-          }
-          return response || fetch(event.request);
-        });
-    })
-  );
+  if (!event.request.url.includes("/api/")) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        console.log(`FETCH FOR STATIC FILE`);
+        console.log(event.request)
+        return cache.match(event.request)
+          .then(response => {
+            if (!response) {
+              console.log(`NOTHING IN CACHE FOR ABOVE REQUEST ${event.request.url}`)
+            }
+            return response || fetch(event.request);
+          });
+      })
+    );
+  }
 });
