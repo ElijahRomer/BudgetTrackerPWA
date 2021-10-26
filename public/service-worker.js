@@ -88,6 +88,11 @@ self.addEventListener(`fetch`, event => {
     return;
   };
 
+  if (event.request.url.includes("/api/" && event.request.method === "GET")) {
+    // TODO: write logic for querying data from indexedDB instead.
+
+  }
+
 
   // if the fetch is for static files on page load
   event.respondWith(
