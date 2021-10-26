@@ -6,6 +6,7 @@ const DATA_CACHE_NAME = "BT-data-cache-v1";
 const FILES_TO_CACHE = [
   '/', //must include this as when you are offline the landing page is linked to the bare '/' request.
   'manifest.webmanifest',
+  'indexedDB.js',
   '/index.html',
   '/index.js',
   '/service-worker.js',
@@ -13,6 +14,7 @@ const FILES_TO_CACHE = [
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
 ];
+
 
 
 self.addEventListener(`install`, event => {
@@ -27,6 +29,8 @@ self.addEventListener(`install`, event => {
   // activate immediately once finished installing
   self.skipWaiting();
 });
+
+
 
 self.addEventListener(`activate`, event => {
   console.log(`SERVICE-WORKER ACTIVATE EVENT REGISTERED`);
@@ -49,20 +53,22 @@ self.addEventListener(`activate`, event => {
   self.clients.claim();
 });
 
+
+
 self.addEventListener(`fetch`, event => {
   console.log(`SERVICE-WORKER FETCH EVENT REGISTERED`);
-  // when fetch event registered, open data cache
   console.log(event);
 
-  if (event.request.url.includes(`/api/`)) {
-    console.log(`FETCH FOR API DATA`, event.request.url);
+  // if the fetch is for posting a new transaction
+  if (event.request.method === 'POST') {
+    console.log(`POST FETCH FOR NEW DATA`, event.request.url);
     console.log(event.request)
 
     event.respondWith(
+
       caches.open(DATA_CACHE_NAME)
         .then(cache => {
-          console.log(cache);
-          // then make the fetch request to the server
+          // attempt to make the fetch request to the server
           return fetch(event.request)
             .then(response => {
               console.log(response.clone());
@@ -71,31 +77,30 @@ self.addEventListener(`fetch`, event => {
               if (response.status === 200) {
                 cache.put(event.request.url, response.clone())
               }
+
               // if the response succeeds OR if response from the server is something other than status 200
               return response;
             })
-            // if there is no connection or the server does not response, check the cache for the requested file
+
+            // if there is no connection or the server does not responsd, check the cache for the requested file
             .catch(err => cache.match(event.request));
         }));
     return;
-  }
+  };
 
+
+  // if the fetch is for static files on page load
   event.respondWith(
     caches.open(CACHE_NAME).then(cache => {
       console.log(`FETCH FOR STATIC FILE`);
-      // console.log(cache);
-      // console.log(event)
       console.log(event.request)
-      return cache.match(event.request).then(response => {
-        if (!response) {
-          console.log(`NOTHING IN CACHE FOR ABOVE REQUEST`)
-        }
-        return response || fetch(event.request);
-      });
+      return cache.match(event.request)
+        .then(response => {
+          if (!response) {
+            console.log(`NOTHING IN CACHE FOR ABOVE REQUEST ${event.request.url}`)
+          }
+          return response || fetch(event.request);
+        });
     })
   );
 });
-
-self.addEventListener(`sync`, (event) => {
-  console.log(`\nSERVICE-WORKER SYNC EVENT FIRED\n`)
-})
