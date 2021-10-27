@@ -27,8 +27,13 @@ fetch("/api/transaction")
       console.log(typeof event.target.result)
       console.log(event.target.result.length)
 
+      sortedTransactions = event.target.result.sort((a, b) => b.date - a.date)
+
+      console.log(`\n\n SORTED TRANSACTIONS ARE AS FOLLOWS \n\n`)
+      console.log(sortedTransactions)
+
       // save indexeddb data on global variable
-      transactions = event.target.result;
+      transactions = sortedTransactions;
 
       // update chart
       populateTotal();
