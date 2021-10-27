@@ -67,7 +67,7 @@ self.addEventListener(`fetch`, event => {
     console.log(event.request.clone())
 
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request.clone())
         .catch((err) => err)
     )
   };

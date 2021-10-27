@@ -9,9 +9,9 @@ request.onupgradeneeded = ({ target }) => {
   // set up indexedDB Schema
   db = target.result;
 
-  const txObjectStore = db.createObjectStore(`transactions`, { keyPath: "name" });
+  const txObjectStore = db.createObjectStore(`transactions`, { autoIncrement: true });
 
-  const unsavedTxObjectStore = db.createObjectStore(`unsavedTransactions`, { keyPath: "name" });
+  const unsavedTxObjectStore = db.createObjectStore(`unsavedTransactions`, { autoIncrement: true });
 
   txObjectStore.createIndex("allTx", "name")
   unsavedTxObjectStore.createIndex("unsavedTx", "name");
@@ -69,7 +69,7 @@ function syncUnsavedTransactions() {
 
         clearUnsavedTx.onsuccess = () => {
           console.log(`\n\nUNSAVED TRANSACTIONS IN INDEXED DB CLEARED.\n\n`);
-          // return;
+          document.location.reload();
         }
         // return;
       }
@@ -95,8 +95,7 @@ function saveRecord(transaction) {
 
   addRecordTransaction.onerror = event => {
     console.log(`AN ERROR OCCURED DURING DBTRANSACTION`)
-    console.log(event)
-    console.log(event.target.error)
+    console.error(event.target.error)
   };
 
   addRecordTransaction.oncomplete = event => {
@@ -140,15 +139,14 @@ function saveRecordForLaterSyncing(transaction) {
 // NEED TO WRITE A FUNCTION TO QUERY ALL INDEXEDDB DATA
 function queryAllRecordsIDB() {
   console.log(`queryAllRecordsIDB FIRED`)
-  console.log(db);
 
   const dbTransaction = db.transaction([`transactions`], 'readonly');
 
   const transactionsStore = dbTransaction.objectStore(`transactions`);
 
-  const dbAccess = transactionsStore.getAll();
-  console.log(`queryAllRecordsIDB RETURNS:`);
-  console.log(dbAccess);
+  // const dbAccess = transactionsStore.getAll();
+  // console.log(`queryAllRecordsIDB RETURNS:`);
+  // console.log(dbAccess);
   return transactionsStore.getAll();
 
 }
