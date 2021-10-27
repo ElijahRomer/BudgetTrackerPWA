@@ -1,5 +1,6 @@
 const request = window.indexedDB.open("budgetAppOfflineDB", 1);
 let db;
+let dbContents;
 
 // if the DB does not exist this will fire, THEN onsuccess
 request.onupgradeneeded = ({ target }) => {
@@ -13,7 +14,7 @@ request.onupgradeneeded = ({ target }) => {
   const unsavedTxObjectStore = db.createObjectStore(`unsavedTransactions`, { keyPath: "name" });
 
   txObjectStore.createIndex("allTx", "name")
-  unsavedTxObjectStore.createIndex("unsavedTx", "name")
+  unsavedTxObjectStore.createIndex("unsavedTx", "name");
 }
 
 // if the DB does exist then this will fire first
@@ -22,7 +23,7 @@ request.onsuccess = (event) => {
 
   // assign the global db variable to the budgetAppOfflineIndexedDB
   db = event.target.result;
-  console.log(event.target.result)
+  console.log(`\n\nDB ASSIGNMENT\n\n`)
   console.log(db)
 
   let internetConnection = InternetConnectionCheck();
@@ -32,9 +33,9 @@ request.onsuccess = (event) => {
     return;
   }
   console.log(`NO INTERNET CONNECTIVITY`);
+  dbContents = queryAllRecordsIDB();
   return;
 }
-
 
 function InternetConnectionCheck() {
   return navigator.onLine;
@@ -95,7 +96,7 @@ function saveRecord(transaction) {
   addRecordTransaction.onerror = event => {
     console.log(`AN ERROR OCCURED DURING DBTRANSACTION`)
     console.log(event)
-    console.log(event.error)
+    console.log(event.target.error)
   };
 
   addRecordTransaction.oncomplete = event => {
@@ -137,6 +138,20 @@ function saveRecordForLaterSyncing(transaction) {
 }
 
 // NEED TO WRITE A FUNCTION TO QUERY ALL INDEXEDDB DATA
-function queryAllRecords() {
+function queryAllRecordsIDB() {
+  console.log(`queryAllRecordsIDB FIRED`)
+  console.log(db);
+
+
+  const dbTransaction = db.transaction([`transactions`], 'readonly');
+
+  const transactionsStore = dbTransaction.objectStore(`transactions`);
+
+  const dbAccess = transactionsStore.getAll();
+  console.log(`queryAllRecordsIDB RETURNS:`);
+  console.log(dbAccess);
+  return transactionsStore.getAll();
 
 }
+
+

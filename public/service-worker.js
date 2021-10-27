@@ -59,40 +59,26 @@ self.addEventListener(`activate`, event => {
 
 self.addEventListener(`fetch`, event => {
   console.log(`SERVICE-WORKER FETCH EVENT REGISTERED`);
-  console.log(event);
+
 
   // if the fetch is for posting a new transaction
   if (event.request.method === 'POST') {
     console.log(`POST FETCH FOR NEW DATA`, event.request.url);
     console.log(event.request.clone())
 
-    event.respondWith(
-      fetch(event.request.clone()))
-    // caches.open(DATA_CACHE_NAME)
-    //   .then(cache => {
-    //     // attempt to make the fetch request to the server
-    //     return fetch(event.request)
-    //       .then(response => {
-    //         console.log(response.clone());
-
-    //         // if the response from server is status 200 add to the cache with key as the request url and the value as the response.
-    //         if (response.status === 200) {
-    //           cache.put(event.request.url, response.clone())
-    //         }
-
-    //         // if the response succeeds OR if response from the server is something other than status 200
-    //         return response;
-    //       })
-
-    //       // if there is no connection or the server does not responsd, check the cache for the requested file
-    //       .catch(err => cache.match(event.request));
-    //   }));
-    // return;
+    // event.respondWith(
+    return fetch(event.request.clone())
+      .catch((err) => err)
   };
 
   if (event.request.url.includes("/api/" && event.request.method === "GET")) {
     // TODO: write logic for querying data from indexedDB instead.
-    return fetch(event.request);
+    return fetch(event.request)
+      .catch((err) => {
+        console.log(`FETCH FAILED, PULLING FROM INDEXEDDB`)
+        console.log(err)
+
+      })
   }
 
 

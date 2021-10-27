@@ -14,43 +14,27 @@ fetch("/api/transaction")
     populateTotal();
     populateTable();
     populateChart();
-
-    // TODO: WRITE A FUNCTION TO VERIFY ALL FETCHED ENTRIES ARE IN THE INDEXED DB. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   })
-  .catch(err => {
-    // TODO: FETCH REQUEST FAILED, PULL RESULTS FROM INDEXEDDB
+  .catch(async err => {
+    // FETCH REQUEST FAILED, PULL RESULTS FROM INDEXEDDB
+    console.log(`FETCH REQUEST FAILED, PULL RESULTS FROM INDEXEDDB`)
     console.log(err);
+    const offlineTX = queryAllRecordsIDB();
 
+    offlineTX.onsuccess = (event) => {
+      console.log(`queryAllRecordsIDB ONSUCCESS FIRED`)
+      console.log(event.target.result)
+      console.log(typeof event.target.result)
+      console.log(event.target.result.length)
 
+      // save indexeddb data on global variable
+      transactions = event.target.result;
 
-
-
-
-
-
-
-
-
-
-
-
-
+      // update chart
+      populateTotal();
+      populateTable();
+      populateChart();
+    }
   })
 
 function populateTotal() {
