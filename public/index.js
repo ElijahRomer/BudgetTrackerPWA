@@ -6,8 +6,6 @@ fetch("/api/transaction")
     return response.json();
   })
   .then(data => {
-    console.log(data);
-
     // save db data on global variable
     transactions = data;
 
@@ -17,17 +15,17 @@ fetch("/api/transaction")
   })
   .catch(async err => {
     // FETCH REQUEST FAILED, PULL RESULTS FROM INDEXEDDB
-    console.log(`FETCH REQUEST FAILED, PULL RESULTS FROM INDEXEDDB`)
+    // console.log(`FETCH REQUEST FAILED, PULL RESULTS FROM INDEXEDDB`)
     console.log(err);
     const offlineTX = queryAllRecordsIDB();
 
     offlineTX.onsuccess = (event) => {
-      console.log(`queryAllRecordsIDB ONSUCCESS FIRED`)
+      // console.log(`queryAllRecordsIDB ONSUCCESS FIRED`)
       console.log(event.target.result)
       console.log(typeof event.target.result)
       console.log(event.target.result.length)
 
-      sortedTransactions = event.target.result.sort((a, b) => b.date - a.date)
+      sortedTransactions = event.target.result.sort((a, b) => a.date - b.date)
 
       console.log(`\n\n SORTED TRANSACTIONS ARE AS FOLLOWS \n\n`)
       console.log(sortedTransactions)
