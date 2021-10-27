@@ -23,8 +23,6 @@ request.onsuccess = (event) => {
 
   // assign the global db variable to the budgetAppOfflineIndexedDB
   db = event.target.result;
-  console.log(`\n\nDB ASSIGNMENT\n\n`)
-  console.log(db)
 
   let internetConnection = InternetConnectionCheck();
   if (internetConnection) {
@@ -33,7 +31,7 @@ request.onsuccess = (event) => {
     return;
   }
   console.log(`NO INTERNET CONNECTIVITY`);
-  dbContents = queryAllRecordsIDB();
+  // dbContents = queryAllRecordsIDB();
   return;
 }
 
@@ -48,7 +46,7 @@ function syncUnsavedTransactions() {
 
   const unsavedTransactions = unsavedTxObjectStore.getAll();
 
-  unsavedTransactions.onsuccess = async () => {
+  unsavedTransactions.onsuccess = async (event) => {
     console.log(`UNSAVED TRANSACTIONS ARE AS FOLLOWS`)
     console.log(unsavedTransactions.result)
     console.log(`length `, unsavedTransactions.result.length)
@@ -62,18 +60,20 @@ function syncUnsavedTransactions() {
           "Content-Type": "application/json"
         }
       })
-        .then(response => response.json())
         .catch(err => console.log(`FAILED TO POST UNSAVED TRANSACTIONS, `, err));
-
+      // the response does have an OK property when .json is not called on it.
       if (response.ok) {
-        const clearUnsavedTx = unsavedTxObjectStore.clear();
+        const clearDBTransaction = db.transaction([`unsavedTransactions`], 'readwrite');
+        const unsavedTxObjectStoreClear = clearDBTransaction.objectStore('unsavedTransactions');
+        const clearUnsavedTx = unsavedTxObjectStoreClear.clear();
 
         clearUnsavedTx.onsuccess = () => {
-          console.log(`UNSAVED TRANSACTIONS SAVED TO SERVER, UNSAVED TRANSACTIONS IN INDEXED DB CLEARED.`);
-          return;
+          console.log(`\n\nUNSAVED TRANSACTIONS IN INDEXED DB CLEARED.\n\n`);
+          // return;
         }
-        return;
+        // return;
       }
+      return;
     }
     console.log(`NO UNSAVED TRANSACTIONS WERE FOUND`)
   };
@@ -141,7 +141,6 @@ function saveRecordForLaterSyncing(transaction) {
 function queryAllRecordsIDB() {
   console.log(`queryAllRecordsIDB FIRED`)
   console.log(db);
-
 
   const dbTransaction = db.transaction([`transactions`], 'readonly');
 

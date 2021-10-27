@@ -34,7 +34,13 @@ fetch("/api/transaction")
       populateTotal();
       populateTable();
       populateChart();
-    }
+    };
+
+    offlineTX.onerror = (event) => {
+      console.log(`An error occured reading entries in indexedDB.`);
+      console.log(err);
+
+    };
   })
 
 function populateTotal() {

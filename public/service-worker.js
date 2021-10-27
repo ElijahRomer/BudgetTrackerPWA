@@ -58,7 +58,7 @@ self.addEventListener(`activate`, event => {
 
 
 self.addEventListener(`fetch`, event => {
-  console.log(`SERVICE-WORKER FETCH EVENT REGISTERED`);
+  // console.log(`SERVICE-WORKER FETCH EVENT REGISTERED`);
 
 
   // if the fetch is for posting a new transaction
@@ -66,18 +66,18 @@ self.addEventListener(`fetch`, event => {
     console.log(`POST FETCH FOR NEW DATA`, event.request.url);
     console.log(event.request.clone())
 
-    // event.respondWith(
-    return fetch(event.request.clone())
-      .catch((err) => err)
+    event.respondWith(
+      fetch(event.request)
+        .catch((err) => err)
+    )
   };
 
   if (event.request.url.includes("/api/" && event.request.method === "GET")) {
-    // TODO: write logic for querying data from indexedDB instead.
+    console.log(`Includes /api/ with method GET`)
     return fetch(event.request)
       .catch((err) => {
         console.log(`FETCH FAILED, PULLING FROM INDEXEDDB`)
         console.log(err)
-
       })
   }
 
@@ -86,12 +86,12 @@ self.addEventListener(`fetch`, event => {
   if (!event.request.url.includes("/api/")) {
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
-        console.log(`FETCH FOR STATIC FILE`);
-        console.log(event.request)
+        // console.log(`FETCH FOR STATIC FILE`);
+        // console.log(event.request)
         return cache.match(event.request)
           .then(response => {
             if (!response) {
-              console.log(`NOTHING IN CACHE FOR ABOVE REQUEST ${event.request.url}`)
+              console.log(`NOTHING IN CACHE FOR REQUEST ${event.request.url}`)
             }
             return response || fetch(event.request);
           });
